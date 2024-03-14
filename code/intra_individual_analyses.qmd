@@ -1,0 +1,320 @@
+---
+title: "Intra-individual microbiome variation in YFRW"
+author: Raphael Eisenhofer
+format: 
+  gfm:
+    fig-width: 12
+    fig-height: 7
+    fig-dpi: 300
+  pdf:
+    fig-width: 12
+    fig-height: 7
+    fig-dpi: 300  
+editor: visual
+---
+
+### About
+
+This is a supplementary analyses that seeks to ask the following question: **How much intra-individual variation is there in microbiome diversity and composition?** In this dataset we have longitudinal sampling of some individuals for up to three time points.
+
+### Import data/load packages/filter samples
+
+```{r}
+#| message: false
+library(tidyverse)
+library(phyloseq)
+library(microbiome)
+library(patchwork)
+library(ggh4x)
+
+colours <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", 
+             "#0072B2", "#D55E00", "#CC79A7", "#000000", "darkgrey")
+
+ps <- readRDS("../data/ps_faecal.rds")
+
+#filter out chloroplast sequences
+ps_filt <- subset_taxa(ps, Genus != "Chloroplast" & Order != "Chloroplast")
+
+#mean proportion of chloroplast reads?
+prop_chloro <- scales::percent((1 - mean(sample_sums(ps_filt) / sample_sums(ps))), accuracy = 0.1)
+
+#Determine lowest depth sample (for rarefaction depth)
+rarefaction_depth <- sort(sample_sums(ps_filt))[[1]]
+
+ps_rar <- rarefy_even_depth(ps_filt, 
+                            sample.size = rarefaction_depth, 
+                            rngseed = 1337)
+
+ps_adults <- subset_samples(ps_rar, 
+                            Animal_ageclass != "Juvenile")
+
+#Subset table for individuals with >1 sample
+ps_individuals <- subset_samples(ps_adults, Dam_name == "Cecilia" | Dam_name == "Eileen" | Dam_name == "Pandora" | Dam_name == "Polly" | Dam_name == "Pumpkin" | Dam_name == "Zara" | Dam_name == "Parker" | Dam_name == "Pickle" | Dam_name == "Ringo")
+
+
+#filter low prevalence ASVs
+#Set the relative abundance threshold
+threshold <- 0.0005 # = 0.05%
+
+#Calculate the threshold counts for each sample
+threshold_counts <- rarefaction_depth * threshold
+
+#Multiply the OTU table by a logical matrix indicating which values are above the threshold
+filtered <- ps_individuals@otu_table * (ps_individuals@otu_table >= threshold_counts)
+
+#Load back into out phyloseq object
+ps_ind_filtered <- ps_individuals
+ps_ind_filtered@otu_table <- otu_table(filtered, taxa_are_rows = TRUE)
+
+#Check out how much data was removed:
+scales::percent(sample_sums(ps_ind_filtered) / sample_sums(ps_individuals), accuracy = 0.1)
+
+
+#Now look at prevalence of ASVs
+prevdf <- apply(X = otu_table(ps_ind_filtered),
+             MARGIN = ifelse(taxa_are_rows(ps_ind_filtered), yes = 1, no = 2),
+             FUN = function(x){sum(x > 0)})
+#Add taxonomy and total read counts to this data.frame
+prevdf <- data.frame(Prevalence = prevdf,
+                   TotalAbundance = taxa_sums(ps_ind_filtered),
+                   tax_table(ps_ind_filtered))
+
+#OK, how many ASVs are only found in 1 sample?
+#first remove ASVs with 0 prevalence
+prev0 <- prevdf %>% filter(Prevalence != 0)
+num_asvs <- nrow(prev0)
+prev1 <- scales::percent(nrow(prev0 %>% filter(Prevalence >= 2)) / num_asvs, accuracy = 0.1)
+
+
+#execute prevalence filter
+ps_ind_prev_filtered <- ps_ind_filtered
+keepTaxa <- rownames(prev0)[(prev0$Prevalence >= 2)]
+ps_ind_prev_filtered <- prune_taxa(keepTaxa, ps_ind_filtered)
+
+ps_individuals <- ps_ind_prev_filtered
+```
+
+Note: a mean of `r prop_chloro` chloroplast DNA in these samples!
+
+Note: I also set a minimum ASV abundance threshold per sample for a couple of reasons. (1) amplicon data is noisy, (2) cross-sample contamination during lab work/sequencing is a thing, and this is a conservative approach for addressing it. The threshold used is 0.0005 (i.e. if a sample has 10000 counts, ASVs with \<=5 counts are set to 0)
+
+Note: I also removed ASVs only found in 1 sample, resulting in `r prev1` of ASVs remaining after filtering.
+
+### Taxonomic composition
+
+```{r}
+#| message: false
+                      
+library(microshades)
+
+py_mdf <- ps_individuals %>%
+  tax_glom("Genus") %>%
+  phyloseq::transform_sample_counts(function(x) { x/sum(x) }) %>%
+  psmelt() %>%
+  filter(Abundance > 0)
+
+#get the top 6 most abundant phyla
+counts <- ps_individuals %>%
+  tax_glom("Genus") %>%
+  psmelt()
+mean <- counts %>%
+  group_by(Phylum) %>%
+  summarise(relab = sum(Abundance))
+
+ms_py <- create_color_dfs(py_mdf, 
+                          selected_groups = c('Firmicutes',
+                                              'Bacteroidota',
+                                              'Verrucomicrobiota',
+                                              'Cyanobacteria',
+                                              'Proteobacteria'),
+                          group_level = "Phylum", 
+                          subgroup_level = "Genus", 
+                          cvd = TRUE)
+
+
+plot_microshades(ms_py$mdf, 
+                 cdf = ms_py$cdf, 
+                 group_label = "Phylum Genus") +
+  facet_nested(~Location + Dam_name,
+               space = "free",
+               scale = "free") +
+  scale_y_continuous(labels = scales::percent, 
+                     expand = expansion(0)) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    axis.text.x = element_blank(),
+    strip.text = element_text(size = 16, face = "bold")
+  ) +
+  xlab("") +
+  ylab("Relative abundance (%)")
+
+
+#ggsave("../figures/Figure4.png", height = 12, width = 12)
+```
+
+Apart from Pumpkin, intra-individual variation does not seem to major.
+
+### Alpha diversity
+
+```{r}
+#| message: false  
+
+#calculate alpha diverisites
+alpha_diversity <- alpha(ps_individuals, index = "all")
+
+#edit metadata file for plotting
+metadata <- meta(ps_individuals)
+metadata$name <- rownames(metadata)
+alpha_diversity$name <- rownames(alpha_diversity)
+alpha_diversity_metadata <- merge(alpha_diversity, metadata, by = "name")
+
+#plot
+a <- alpha_diversity_metadata %>%
+  ggplot(aes(x = Dam_name, y = observed, colour = Dam_name)) +
+#  geom_boxplot() +
+  geom_jitter(size = 3, width = 0.3, height = 0) +
+  geom_line() +
+  scale_colour_manual(values = colours) +
+  theme_classic() +
+  theme(
+    axis.title.x = element_blank(),
+    legend.position = "none",
+    axis.text.x = element_blank(),
+    ) +
+  ylab("ASV Richness") +
+  ggtitle("Alpha diversity by individual") 
+
+b <- alpha_diversity_metadata %>%
+  ggplot(aes(x = Dam_name, y = evenness_pielou, colour = Dam_name)) +
+#  geom_boxplot() +
+  geom_jitter(size = 3, width = 0.3, height = 0) +
+  geom_line() +
+  scale_colour_manual(values = colours) +
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_classic() +
+  theme(
+    axis.title.x = element_blank(),
+    legend.position = "none",
+    strip.background = element_blank(),
+    strip.text = element_blank()
+    ) +
+  ylab("Evenness (Pielou)")
+#use patchwork to join figures
+a / b
+
+#ggsave("../figures/noPY_location_sex.png", width = 10, height = 5)
+```
+
+Seems to be some variation in some individuals, but lets see what composition looks like.
+
+### Beta diversity
+
+E.g. are samples from the same individual more similar to each other (in microbial composition) than between individuals?
+
+```{r}
+#| message: false  
+
+#Beta diversity
+unweighted_unifrac <- ordinate(ps_individuals, 
+                               method = "PCoA", 
+                               distance = "unifrac", weighted=F)
+
+weighted_unifrac <- ordinate(ps_individuals, 
+                               method = "PCoA", 
+                               distance = "unifrac", weighted=T)
+
+#Unweighted
+uw <- plot_ordination(physeq = ps_individuals,
+                ordination = unweighted_unifrac,
+                color = "Dam_name",
+                shape = "Location",
+                axes = c(1, 2)) +
+  geom_point(size = 4) +
+  geom_line() +
+  theme_minimal() +
+  scale_colour_manual(values = colours) +
+  theme_classic() +
+  ggtitle("A) Unweighted UniFrac") +
+  theme(
+    legend.position = "none",
+    legend.title = element_blank()
+    ) 
+
+#Weighted
+w <- plot_ordination(physeq = ps_individuals,
+                ordination = weighted_unifrac,
+                color = "Dam_name",
+                shape = "Location",
+                axes = c(1, 2)) +
+  geom_point(size = 4) +
+  geom_line() +
+  theme_minimal() +
+  scale_colour_manual(values = colours) +
+  theme_classic() +
+  ggtitle("B) Weighted UniFrac") +
+  theme(
+    legend.position = "right",
+    legend.title = element_blank(),
+    axis.text = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    legend.text = element_text(size = 16),
+    ) 
+
+uw / w
+
+# ggsave("../figures/Figure4.png", height = 10, width = 10)
+```
+
+With unweighted, axis 1 correlates to location. Axis 1 of weighted seems to be driven mostly by Pumpkin. Let's check the same but with axis2/3.
+
+### Beta diversity (axes 2/3)
+
+```{r}
+#| message: false 
+
+#Unweighted
+uw <- plot_ordination(physeq = ps_individuals,
+                ordination = unweighted_unifrac,
+                color = "Dam_name",
+                shape = "Location",
+                axes = c(2, 3)) +
+  geom_point(size = 4) +
+  geom_line() +
+  theme_minimal() +
+  scale_colour_manual(values = colours) +
+  theme_classic() +
+  ggtitle("A) Unweighted UniFrac") +
+  theme(
+    legend.position = "none",
+    legend.title = element_blank()
+    ) 
+
+#Weighted
+w <- plot_ordination(physeq = ps_individuals,
+                ordination = weighted_unifrac,
+                color = "Dam_name",
+                shape = "Location",
+                axes = c(2, 3)) +
+  geom_point(size = 4) +
+  geom_line() +
+  theme_minimal() +
+  scale_colour_manual(values = colours) +
+  theme_classic() +
+  ggtitle("B) Weighted UniFrac") +
+  theme(
+    legend.position = "right",
+    legend.title = element_blank(),
+    axis.text = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    legend.text = element_text(size = 16),
+    ) 
+
+uw / w
+
+```
+
+Now axis 2 seems to correlate with intra-individual variation.
+
+### 
