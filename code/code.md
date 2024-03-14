@@ -3,7 +3,7 @@ Raphael Eisenhofer
 
 ### Code for the YFRW faecal 16S microbiome paper
 
-### Load packages / import data / rarefy table / clean counts
+# Load packages / import data / rarefy table / clean counts
 
 Phyloseq object is in a .rda file
 
@@ -97,7 +97,7 @@ conservative approach for addressing it. The threshold used is 0.0005
 Note: I also removed ASVs only found in 1 sample, resulting in 62.8% of
 ASVs remaining after filtering.
 
-### Alpha diversity (sex / location)
+# Alpha diversity (sex / location)
 
 ``` r
 #calculate alpha diverisites
@@ -154,7 +154,7 @@ ggsave("../figures/noPY_location_sex.png", width = 10, height = 5)
 See slightly lower microbial richness in Bimbowrie compared to Italowie.
 Sex does not seem to influence faecal microbiome diversity.
 
-### Alpha diversity (season / location)
+# Alpha diversity (season / location)
 
 ``` r
 #calculate alpha diverisites
@@ -211,7 +211,7 @@ ggsave("../figures/noPY_location_trip.png", width = 10, height = 5)
 Can see a moderate difference in ASV richness between season 2/3 for
 Bimbowrie, but not for Italowie.
 
-### Alpha diversity stats
+# Alpha diversity stats
 
 ``` r
 library(lme4)
@@ -348,7 +348,7 @@ between location/sampling trip have a statistically significant
 influence on microbial richness. Microbial community evenness however,
 does not seem to follow this trend.
 
-### Beta diversity (axes 1/2)
+# Beta diversity (axes 1/2)
 
 ``` r
 library(vegan)
@@ -551,7 +551,7 @@ variation in homogeneity between groups.
 statistically significant, and variation explained is lower (R2 =
 0.074). Assumptions regarding homogeneity also seem fine as above.
 
-### Beta diversity (axes 1/3)
+# Beta diversity (axes 1/3)
 
 ``` r
 #Beta diversity
@@ -610,7 +610,7 @@ ggsave("../figures/beta_div_sex_1_3.png", plot = combined, height = 10, width = 
 
 Likewise for axes 1/3. (Didn’t do tests here, but can if needed).
 
-### Beta diversity (separate ordinations for locations)
+# Beta diversity (separate ordinations for locations)
 
 Given that location seems to drive most variation, lets try splitting
 the ordinations then looking at season.
@@ -734,7 +734,7 @@ unweighted unifrac for Bimbowrie, but not so much for Italowie. (Didn’t
 run stats for these, but can if we want to include them in the final
 paper???)
 
-### Taxa bar plots (all samples)
+# Taxa bar plots (all samples)
 
 ``` r
 library(microshades)
@@ -809,7 +809,7 @@ plot_microshades(ms_py$mdf,
 
 Nothing really jumps out here.
 
-### Taxa bar subset of samples
+# Taxa bar subset of samples
 
 ``` r
 library(microshades)
@@ -899,7 +899,7 @@ plot_microshades(ms_py$mdf,
 
 ![](code_files/figure-commonmark/unnamed-chunk-9-1.png)
 
-### Taxa bar subset of samples (2)
+# Taxa bar subset of samples (2)
 
 ``` r
 library(microshades)
@@ -969,7 +969,7 @@ plot_microshades(ms_py$mdf,
 
 ![](code_files/figure-commonmark/unnamed-chunk-10-1.png)
 
-### Differential abundance with ANCOMBC-2
+# Differential abundance with ANCOMBC-2
 
 ``` r
 # library(ANCOMBC)
@@ -1041,7 +1041,9 @@ plot_microshades(ms_py$mdf,
 # ancom_all_asv <- ancombc2_location_asv$res
 ```
 
-### Venn diagrams of ASVs
+Note sample sizes don’t seem sufficient for ANCOM analysis.
+
+# Venn diagrams of ASVs
 
 ``` r
 library(VennDiagram)
@@ -1096,24 +1098,24 @@ VennDiagram::venn.diagram(venn_both,
                           print.mode = c("raw","percent"))
 ```
 
-    INFO [2024-03-14 15:48:21] [[1]]
-    INFO [2024-03-14 15:48:21] venn_both
-    INFO [2024-03-14 15:48:21] 
-    INFO [2024-03-14 15:48:21] $fill
-    INFO [2024-03-14 15:48:21] c("#E69F00", "#56B4E9")
-    INFO [2024-03-14 15:48:21] 
-    INFO [2024-03-14 15:48:21] $disable.logging
-    INFO [2024-03-14 15:48:21] [1] TRUE
-    INFO [2024-03-14 15:48:21] 
-    INFO [2024-03-14 15:48:21] $alpha
-    INFO [2024-03-14 15:48:21] [1] 0.5
-    INFO [2024-03-14 15:48:21] 
-    INFO [2024-03-14 15:48:21] $filename
-    INFO [2024-03-14 15:48:21] [1] "../figures/venn.png"
-    INFO [2024-03-14 15:48:21] 
-    INFO [2024-03-14 15:48:21] $print.mode
-    INFO [2024-03-14 15:48:21] c("raw", "percent")
-    INFO [2024-03-14 15:48:21] 
+    INFO [2024-03-14 15:59:04] [[1]]
+    INFO [2024-03-14 15:59:04] venn_both
+    INFO [2024-03-14 15:59:04] 
+    INFO [2024-03-14 15:59:04] $fill
+    INFO [2024-03-14 15:59:04] c("#E69F00", "#56B4E9")
+    INFO [2024-03-14 15:59:04] 
+    INFO [2024-03-14 15:59:04] $disable.logging
+    INFO [2024-03-14 15:59:04] [1] TRUE
+    INFO [2024-03-14 15:59:04] 
+    INFO [2024-03-14 15:59:04] $alpha
+    INFO [2024-03-14 15:59:04] [1] 0.5
+    INFO [2024-03-14 15:59:04] 
+    INFO [2024-03-14 15:59:04] $filename
+    INFO [2024-03-14 15:59:04] [1] "../figures/venn.png"
+    INFO [2024-03-14 15:59:04] 
+    INFO [2024-03-14 15:59:04] $print.mode
+    INFO [2024-03-14 15:59:04] c("raw", "percent")
+    INFO [2024-03-14 15:59:04] 
 
     [1] 1
 

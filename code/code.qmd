@@ -15,7 +15,7 @@ editor: visual
 
 ### Code for the YFRW faecal 16S microbiome paper
 
-### Load packages / import data / rarefy table / clean counts
+# Load packages / import data / rarefy table / clean counts
 
 Phyloseq object is in a .rda file
 
@@ -107,7 +107,7 @@ Note: I also set a minimum ASV abundance threshold per sample for a couple of re
 
 Note: I also removed ASVs only found in 1 sample, resulting in `r prev1` of ASVs remaining after filtering.
 
-### Alpha diversity (sex / location)
+# Alpha diversity (sex / location)
 
 ```{r}
 #| message: false  
@@ -161,7 +161,7 @@ ggsave("../figures/noPY_location_sex.png", width = 10, height = 5)
 
 See slightly lower microbial richness in Bimbowrie compared to Italowie. Sex does not seem to influence faecal microbiome diversity.
 
-### Alpha diversity (season / location)
+# Alpha diversity (season / location)
 
 ```{r}
 #| message: false  
@@ -215,7 +215,7 @@ ggsave("../figures/noPY_location_trip.png", width = 10, height = 5)
 
 Can see a moderate difference in ASV richness between season 2/3 for Bimbowrie, but not for Italowie.
 
-### Alpha diversity stats
+# Alpha diversity stats
 
 ```{r}
 #| message: false  
@@ -265,7 +265,7 @@ Finally, evenness (with the same formula) paints a different picture. Only locat
 
 In conclusion, sex does not have an observable influence on microbial richness. Location (strongest), sampling_trip, and the interaction between location/sampling trip have a statistically significant influence on microbial richness. Microbial community evenness however, does not seem to follow this trend.
 
-### Beta diversity (axes 1/2)
+# Beta diversity (axes 1/2)
 
 ```{r}
 #| message: false  
@@ -377,7 +377,7 @@ Use Adonis (PERMANOVA-like) to test for statistically significant influences of 
 **Weighted UniFrac\
 **Similar results to Unweighted UniFrac, except only location is statistically significant, and variation explained is lower (R2 = 0.074). Assumptions regarding homogeneity also seem fine as above.
 
-### Beta diversity (axes 1/3)
+# Beta diversity (axes 1/3)
 
 ```{r}
 #| message: false  
@@ -435,7 +435,7 @@ ggsave("../figures/beta_div_sex_1_3.png", plot = combined, height = 10, width = 
 
 Likewise for axes 1/3. (Didn't do tests here, but can if needed).
 
-### Beta diversity (separate ordinations for locations)
+# Beta diversity (separate ordinations for locations)
 
 Given that location seems to drive most variation, lets try splitting the ordinations then looking at season.
 
@@ -549,7 +549,7 @@ ggsave("../figures/beta_div_ital_1_2.png", plot = ital_combined, height = 10, wi
 
 We again see variation associated with season across axis 1 for unweighted unifrac for Bimbowrie, but not so much for Italowie. (Didn't run stats for these, but can if we want to include them in the final paper???)
 
-### Taxa bar plots (all samples)
+# Taxa bar plots (all samples)
 
 ```{r}
 #| message: false   
@@ -607,7 +607,7 @@ plot_microshades(ms_py$mdf,
 
 Nothing really jumps out here.
 
-### Taxa bar subset of samples
+# Taxa bar subset of samples
 
 ```{r}
 #| message: false     
@@ -679,7 +679,7 @@ plot_microshades(ms_py$mdf,
 
 ```
 
-### Taxa bar subset of samples (2)
+# Taxa bar subset of samples (2)
 
 ```{r}
 #| message: false
@@ -750,7 +750,7 @@ plot_microshades(ms_py$mdf,
 
 ```
 
-### Differential abundance with ANCOMBC-2
+# Differential abundance with ANCOMBC-2
 
 ```{r}
 #| message: false 
@@ -827,7 +827,9 @@ plot_microshades(ms_py$mdf,
 
 ```
 
-### Venn diagrams of ASVs
+Note sample sizes don't seem sufficient for ANCOM analysis.
+
+# Venn diagrams of ASVs
 
 ```{r}
 library(VennDiagram)
