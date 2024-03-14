@@ -1,6 +1,25 @@
 # Yellow-footed rock wallaby faecal 16S paper
 Raphael Eisenhofer
 
+- [Code for the YFRW faecal 16S microbiome
+  paper](#code-for-the-yfrw-faecal-16s-microbiome-paper)
+- [Load packages / import data / rarefy table / clean
+  counts](#load-packages--import-data--rarefy-table--clean-counts)
+- [Alpha diversity (sex / location)](#alpha-diversity-sex--location)
+- [Alpha diversity (season /
+  location)](#alpha-diversity-season--location)
+- [Alpha diversity stats](#alpha-diversity-stats)
+- [Beta diversity (axes 1/2)](#beta-diversity-axes-12)
+- [Beta diversity (axes 1/3)](#beta-diversity-axes-13)
+- [Beta diversity (separate ordinations for
+  locations)](#beta-diversity-separate-ordinations-for-locations)
+- [Taxa bar plots (all samples)](#taxa-bar-plots-all-samples)
+- [Taxa bar subset of samples](#taxa-bar-subset-of-samples)
+- [Taxa bar subset of samples (2)](#taxa-bar-subset-of-samples-2)
+- [Differential abundance with
+  ANCOMBC-2](#differential-abundance-with-ancombc-2)
+- [Venn diagrams of ASVs](#venn-diagrams-of-asvs)
+
 ### Code for the YFRW faecal 16S microbiome paper
 
 # Load packages / import data / rarefy table / clean counts
@@ -1098,24 +1117,24 @@ VennDiagram::venn.diagram(venn_both,
                           print.mode = c("raw","percent"))
 ```
 
-    INFO [2024-03-14 15:59:04] [[1]]
-    INFO [2024-03-14 15:59:04] venn_both
-    INFO [2024-03-14 15:59:04] 
-    INFO [2024-03-14 15:59:04] $fill
-    INFO [2024-03-14 15:59:04] c("#E69F00", "#56B4E9")
-    INFO [2024-03-14 15:59:04] 
-    INFO [2024-03-14 15:59:04] $disable.logging
-    INFO [2024-03-14 15:59:04] [1] TRUE
-    INFO [2024-03-14 15:59:04] 
-    INFO [2024-03-14 15:59:04] $alpha
-    INFO [2024-03-14 15:59:04] [1] 0.5
-    INFO [2024-03-14 15:59:04] 
-    INFO [2024-03-14 15:59:04] $filename
-    INFO [2024-03-14 15:59:04] [1] "../figures/venn.png"
-    INFO [2024-03-14 15:59:04] 
-    INFO [2024-03-14 15:59:04] $print.mode
-    INFO [2024-03-14 15:59:04] c("raw", "percent")
-    INFO [2024-03-14 15:59:04] 
+    INFO [2024-03-14 16:10:02] [[1]]
+    INFO [2024-03-14 16:10:02] venn_both
+    INFO [2024-03-14 16:10:02] 
+    INFO [2024-03-14 16:10:02] $fill
+    INFO [2024-03-14 16:10:02] c("#E69F00", "#56B4E9")
+    INFO [2024-03-14 16:10:02] 
+    INFO [2024-03-14 16:10:02] $disable.logging
+    INFO [2024-03-14 16:10:02] [1] TRUE
+    INFO [2024-03-14 16:10:02] 
+    INFO [2024-03-14 16:10:02] $alpha
+    INFO [2024-03-14 16:10:02] [1] 0.5
+    INFO [2024-03-14 16:10:02] 
+    INFO [2024-03-14 16:10:02] $filename
+    INFO [2024-03-14 16:10:02] [1] "../figures/venn.png"
+    INFO [2024-03-14 16:10:02] 
+    INFO [2024-03-14 16:10:02] $print.mode
+    INFO [2024-03-14 16:10:02] c("raw", "percent")
+    INFO [2024-03-14 16:10:02] 
 
     [1] 1
 

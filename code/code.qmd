@@ -6,10 +6,12 @@ format:
     fig-width: 12
     fig-height: 7
     fig-dpi: 300
+    toc: true
   html:
     fig-width: 12
     fig-height: 7
-    fig-dpi: 300  
+    fig-dpi: 300
+    toc: true
 editor: visual
 ---
 
